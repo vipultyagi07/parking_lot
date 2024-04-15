@@ -17,9 +17,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorClass> handleRuntimeException(RuntimeException ex) {
         if (ex instanceof ParkingLotException) {
             // Handle ParkingLotException
-            ParkingLotException ple = (ParkingLotException) ex;
-            log.error("Parking Lot Exception: " + ple.getErrorCode() + " - " + ple.getMessage(), ple);
-            ErrorClass errorClass = new ErrorClass(ple.getErrorCode(), ple.getMessage());
+            ParkingLotException parkingLotException = (ParkingLotException) ex;
+            log.error("Parking Lot Exception: " + parkingLotException.getErrorCode() + " - " + parkingLotException.getMessage(), parkingLotException);
+            ErrorClass errorClass = new ErrorClass(parkingLotException.getErrorCode(), parkingLotException.getMessage());
             return new ResponseEntity<>(errorClass, HttpStatus.BAD_REQUEST);
         } else {
             // Handle other RuntimeExceptions
@@ -30,11 +30,30 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ParkingLotException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorClass> handleParkingLotException(ParkingLotException ex) {
         // Handle ParkingLotException
-        log.error("Parking Lot Exception: " + ex.getErrorCode() + " - " + ex.getMessage(), ex);
-        ErrorClass errorClass = new ErrorClass(ex.getErrorCode(), ex.getMessage());
-        return new ResponseEntity<>(errorClass, HttpStatus.BAD_REQUEST);
+        String errorCode = ex.getErrorCode();
+        // Check if it's an incorrect password error
+        if ("INCORRECT_PASSWORD".equals(errorCode)) {
+            log.error("Incorrect password: " + ex.getMessage(), ex);
+            ErrorClass errorClass = new ErrorClass(errorCode, ex.getMessage());
+            return new ResponseEntity<>(errorClass, HttpStatus.UNAUTHORIZED);
+        }
+        else if("USER_IS_ALREADY_PRESENT".equals(errorCode)){
+            log.error("User already present, please sign in: " + ex.getMessage(), ex);
+            ErrorClass errorClass = new ErrorClass(errorCode, ex.getMessage());
+            return new ResponseEntity<>(errorClass, HttpStatus.CONFLICT);
+
+        }else if("USER_IS_NOT_PRESENT".equals(errorCode)){
+            log.error("User is not present, please sign up: " + ex.getMessage(), ex);
+            ErrorClass errorClass = new ErrorClass(errorCode, ex.getMessage());
+            return new ResponseEntity<>(errorClass, HttpStatus.NOT_FOUND);
+
+        }else {
+            // Handle other types of errors
+            log.error("Parking Lot Exception: " + errorCode + " - " + ex.getMessage(), ex);
+            ErrorClass errorClass = new ErrorClass(errorCode, ex.getMessage());
+            return new ResponseEntity<>(errorClass, HttpStatus.BAD_REQUEST);
+        }
     }
 }

@@ -11,5 +11,8 @@ public class ErrorCode {
     public static final String INVALID_VEHICLE_TYPE = "INVALID_VEHICLE_TYPE";
     public static final String VEHICLE_ALREADY_PARKED ="VEHICLE_ALREADY_PARKED";
     public static final String VEHICLE_ALREADY_LEFT_THE_PARKING_LOT ="VEHICLE_ALREADY_LEFT_THE_PARKING_LOT";
+    public static final String INCORRECT_PASSWORD ="INCORRECT_PASSWORD";
+    public static final String USER_IS_NOT_PRESENT ="USER_IS_NOT_PRESENT";
+    public static final String USER_IS_ALREADY_PRESENT ="USER_IS_ALREADY_PRESENT";
     // Add more error codes as needed for your specific use cases
 }
