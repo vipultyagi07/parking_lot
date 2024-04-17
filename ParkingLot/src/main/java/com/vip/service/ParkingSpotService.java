@@ -28,14 +28,11 @@ public class ParkingSpotService {
 
     public ParkingSpotDto viewParkingSpot(VehicleType vehicleType) {
         ParkingSpotDto parkingSpotDto= new ParkingSpotDto();
-        Object[] result = parkingSpotRepository.countTotalAndFreeSpots(vehicleType.getDisplayName());
+        long countByType = parkingSpotRepository.countByType(vehicleType.getDisplayName());
+        long countByTypeAndIsEmptyTrue = parkingSpotRepository.countByTypeAndIsEmptyTrue(vehicleType.getDisplayName());
 
-        // Extract total and free spot counts from the result
-        long totalSpot = (result != null && result.length > 0 && result[0] != null) ? (long) result[0] : 0;
-        long freeSpot = (result != null && result.length > 1 && result[1] != null) ? (long) result[1] : 0;
-
-        parkingSpotDto.setTotalSpot(totalSpot);
-        parkingSpotDto.setFreeSpot(freeSpot);
+        parkingSpotDto.setTotalSpot(countByType);
+        parkingSpotDto.setFreeSpot(countByTypeAndIsEmptyTrue);
         parkingSpotDto.setVehicleType(vehicleType);
         return parkingSpotDto;
     }

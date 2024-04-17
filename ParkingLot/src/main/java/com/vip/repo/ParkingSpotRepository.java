@@ -12,6 +12,6 @@ public interface ParkingSpotRepository extends JpaRepository<ParkingSpot,Long> {
     List<ParkingSpot> findByType(String type);
 
     List<ParkingSpot> findByTypeAndIsEmptyTrue(String type);
+    long countByTypeAndIsEmptyTrue(String type);
 
-    @Query("SELECT COUNT(p), SUM(CASE WHEN p.isEmpty = true THEN 1 ELSE 0 END) FROM ParkingSpot p WHERE p.type = :vehicleType")
-    Object[] countTotalAndFreeSpots(@Param("vehicleType") String vehicleType);}
+}
