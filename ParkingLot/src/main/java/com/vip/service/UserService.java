@@ -1,10 +1,9 @@
 package com.vip.service;
 
 
+import com.vip.common.enums.LoginAndSignupStatus;
 import com.vip.common.utility.Utils;
-import com.vip.dto.LoginDto;
-import com.vip.dto.SignUpDto;
-import com.vip.dto.UserRepo;
+import com.vip.dto.*;
 import com.vip.entity.User;
 import com.vip.exception.ErrorCode;
 import com.vip.exception.ParkingLotException;
@@ -30,12 +29,12 @@ public class UserService {
     @Autowired
     private PasswordEncoderService passwordEncoderService;
 
-    public ResponseEntity<Object> saveTheDataOfNewUser(SignUpDto signUpDto) throws Exception {
+    public ResponseEntity<SignUpResponseDto> saveTheDataOfNewUser(SignUpDto signUpDto) throws Exception {
+        SignUpResponseDto signUpResponseDto= new SignUpResponseDto();
 
         Optional<User> existingUser = userRepo.findByEmail(signUpDto.getEmail());
         if(existingUser.isPresent()){
             throw new ParkingLotException("User already present, please sign in",ErrorCode.USER_IS_ALREADY_PRESENT);
-
         }
         Optional<User> existingUserMobile = userRepo.findTop1ByMobileNo(signUpDto.getMobileNo());
         if(existingUserMobile.isPresent()){
@@ -57,13 +56,15 @@ public class UserService {
         
         newUser.setPasswordHash(encryptPassword);
 
-        User save = userRepo.save(newUser);
-        return new ResponseEntity<>(save,HttpStatus.OK);
+        User createdUser = userRepo.save(newUser);
+        signUpResponseDto.setUser(createdUser);
+        signUpResponseDto.setSignUpStatus(LoginAndSignupStatus.USER_CREATED_SUCCESSFULLY.getDisplayName());
+        return new ResponseEntity<>(signUpResponseDto,HttpStatus.OK);
 
 
     }
 
-    public String loginExistingUser(LoginDto loginDto) throws Exception {
+    public ResponseEntity<LoginResponseDto>  loginExistingUser(LoginDto loginDto) throws Exception {
 
         String secretKey = Utils.SECRET_KEY;
 
@@ -78,7 +79,11 @@ public class UserService {
               String encryptPassword = user.get().getPasswordHash();
               String originalPassword = passwordEncoderService.verifyPassword(encryptPassword, secretKey);
               if (loginDto.getPassword().equals(originalPassword)) {
-                  return "login successful";
+                  LoginResponseDto loginResponseDto= new LoginResponseDto();
+                  loginResponseDto.setEmail(loginDto.getEmail());
+                  loginResponseDto.setLoginStatus(LoginAndSignupStatus.LOGIN_SUCCESSFUL.getDisplayName());
+                  return new ResponseEntity<>(loginResponseDto, HttpStatus.OK);
+
               } else{
                   throw new ParkingLotException("incorrect password",ErrorCode.INCORRECT_PASSWORD);
               }

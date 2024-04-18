@@ -1,7 +1,9 @@
 package com.vip.controller;
 
 import com.vip.dto.LoginDto;
+import com.vip.dto.LoginResponseDto;
 import com.vip.dto.SignUpDto;
+import com.vip.dto.SignUpResponseDto;
 import com.vip.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,14 +20,13 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/sign/up")
-    public ResponseEntity<Object> signUpUser(@RequestBody SignUpDto signUpDto) throws Exception {
+    public ResponseEntity<SignUpResponseDto> signUpUser(@RequestBody SignUpDto signUpDto) throws Exception {
 
         return userService.saveTheDataOfNewUser(signUpDto);
 
     }
     @PostMapping("/sign/in")
-    public String signInUser(@RequestBody LoginDto loginDto) throws Exception {
-
+    public ResponseEntity<LoginResponseDto> signInUser(@RequestBody LoginDto loginDto) throws Exception {
         return userService.loginExistingUser(loginDto);
     }
 
