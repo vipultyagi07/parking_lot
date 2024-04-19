@@ -34,11 +34,11 @@ public class UserService {
 
         Optional<User> existingUser = userRepo.findByEmail(signUpDto.getEmail());
         if(existingUser.isPresent()){
-            throw new ParkingLotException("User already present, please sign in",ErrorCode.USER_IS_ALREADY_PRESENT);
+            throw new ParkingLotException("Email is already registered, please sign in",ErrorCode.USER_IS_ALREADY_PRESENT);
         }
         Optional<User> existingUserMobile = userRepo.findTop1ByMobileNo(signUpDto.getMobileNo());
         if(existingUserMobile.isPresent()){
-            throw new ParkingLotException("User already present, please sign in",ErrorCode.USER_IS_ALREADY_PRESENT);
+            throw new ParkingLotException("Mobile is already registered, please sign in",ErrorCode.USER_IS_ALREADY_PRESENT);
 
         }
 
