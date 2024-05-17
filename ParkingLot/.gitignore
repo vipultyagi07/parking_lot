@@ -1,0 +1,25 @@
+# Spring Boot #
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Compiled class file
+*.class
+
+# Log files
+*.log
+
+# IntelliJ IDEA
+*.idea/
+*.iml
+
+# Eclipse
+*.classpath
+*.project
+.settings/
+
+# VS Code
+*.vscode/
+
+# Maven
+mvnw
+mvnw.cmd
