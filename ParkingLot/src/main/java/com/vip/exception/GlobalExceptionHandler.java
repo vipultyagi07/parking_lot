@@ -13,21 +13,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ErrorClass> handleRuntimeException(RuntimeException ex) {
-        if (ex instanceof ParkingLotException) {
-            // Handle ParkingLotException
-            ParkingLotException parkingLotException = (ParkingLotException) ex;
-            log.error("Parking Lot Exception: " + parkingLotException.getErrorCode() + " - " + parkingLotException.getMessage(), parkingLotException);
-            ErrorClass errorClass = new ErrorClass(parkingLotException.getErrorCode(), parkingLotException.getMessage());
-            return new ResponseEntity<>(errorClass, HttpStatus.BAD_REQUEST);
-        } else {
-            // Handle other RuntimeExceptions
-            log.error("Unexpected runtime exception: " + ex.getMessage(), ex);
-            ErrorClass errorClass = new ErrorClass(ErrorCode.INTERNAL_SERVER_ERROR, ex.getMessage());
-            return new ResponseEntity<>(errorClass, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 
     @ExceptionHandler(ParkingLotException.class)
     public ResponseEntity<ErrorClass> handleParkingLotException(ParkingLotException ex) {
@@ -49,11 +34,15 @@ public class GlobalExceptionHandler {
             ErrorClass errorClass = new ErrorClass(errorCode, ex.getMessage());
             return new ResponseEntity<>(errorClass, HttpStatus.NOT_FOUND);
 
+        }else if("VEHICLE_ALREADY_PARKED".equals(errorCode)){
+            ErrorClass errorClass = new ErrorClass(errorCode, ex.getMessage());
+            return new ResponseEntity<>(errorClass, HttpStatus.NOT_FOUND);
+
         }else {
-            // Handle other types of errors
+            // Handle all other types of errors
             log.error("Parking Lot Exception: " + errorCode + " - " + ex.getMessage(), ex);
             ErrorClass errorClass = new ErrorClass(errorCode, ex.getMessage());
-            return new ResponseEntity<>(errorClass, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(errorClass, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

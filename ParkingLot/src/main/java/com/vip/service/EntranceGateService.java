@@ -27,6 +27,7 @@ public class EntranceGateService {
 
     public EntranceTicketDto generateParkingTicket(Vehicle vehicle) {
 
+        log.info("generateParkingTicket: Start generating parking ticket for vehicle No :{}",vehicle.getVehicleNo());
         try{/**
          * Here we are finding the existing vehicle, if it is not present then we are treating
          * the parameter vehicle as current vehicle
@@ -38,6 +39,7 @@ public class EntranceGateService {
          */
         ParkingSpot parkingSpot = findParkingSpot(currentVehicle);
         if (parkingSpot == null) {
+            log.info("generateParkingTicket: Stopped generating parking ticket for vehicle: {} as Parking lot is already full  for: {}",vehicle.getVehicleNo(), currentVehicle.getVehicleType().getDisplayName());
             throw new ParkingLotException("Parking lot is already full for " + currentVehicle.getVehicleType().getDisplayName(),
                     ErrorCode.PARKING_NOT_AVAILABLE);
         }
@@ -49,21 +51,20 @@ public class EntranceGateService {
          */
             ParkingTicket generatedTicket = saveAndGenerateTicket(currentVehicle, parkingSpot);
         if(Objects.isNull(generatedTicket)){
-            log.info("Vehicle {} is already parked in the lot",vehicle.getVehicleNo());
+            log.info("generateParkingTicket: Stopped generating parking ticket for vehicle as Vehicle {} is already parked in the lot",vehicle.getVehicleNo());
                 throw new ParkingLotException("Vehicle " + vehicle.getVehicleNo() + " is already parked in the lot",
                         ErrorCode.VEHICLE_ALREADY_PARKED);
             }
+        log.info("generateParkingTicket: Successfully generated  parking ticket for Vehicle no {} ",vehicle.getVehicleNo());
 
-        /**
-         * Here we are updating the parkingSpot with vehicle and updating its "isEmpty" column
-         */
+            /**
+             * Here we are updating the parkingSpot with vehicle and updating its "isEmpty" column
+             */
         parkingSpotService.updateParkingSpace(parkingSpot, false);
 
         return getEntranceTicketDto(currentVehicle, parkingSpot, generatedTicket);
 
         } catch (ParkingLotException ex) {
-        // Handle the custom exception, log the error, or perform other actions
-            log.error("Parking Lot Exception: " + ex.getErrorCode() + " - " + ex.getMessage(), ex);
             throw ex;
         } catch (Exception ex) {
             log.error("Unexpected error: " + ex.getMessage(), ex);
