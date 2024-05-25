@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true" >
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+    <property resource="logback-dev.properties" />
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN:-%5p} [%t{14}] [%mdc{X-RequestUrl},%mdc{X-RequestMethod},%mdc{X-ContextId},%mdc{X-ContextType},%mdc{trace_id},%mdc{span_id},%mdc{X─B3-ParentSpanId}] %logger{59} : %msg%n"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_PATH}/parkinglot.log</file>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!--Creating Async appender. Now we will use FILE-ASYNC appender instead of FILE-->
+    <appender name="FILE-ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE" />
+    </appender>
+
+    <!--Suppress warning messages for exceptions handled by GlobalExceptionHandler-->
+    <logger name="org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver" level="ERROR" additivity="false" />
+    <logger name="org.hibernate" additivity="false" />
+
+    <!--Override level for this package. Additivity false to avoid logging twice-->
+    <logger name="com.vip" level="${LOG_LEVEL}" additivity="false">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE-ASYNC" />
+    </logger>
+
+    <!--Override level for this package. Additivity false to avoid logging twice-->
+    <logger name="org.crazycake.shiro" level="WARN" additivity="false">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE-ASYNC" />
+    </logger>
+
+    <!--This will start logging to respective refs-->
+    <root level="${LOG_LEVEL}">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE-ASYNC" />
+    </root>
+</configuration>
