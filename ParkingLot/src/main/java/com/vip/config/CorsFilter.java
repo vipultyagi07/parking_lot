@@ -16,7 +16,7 @@ public class CorsFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) res;
         HttpServletRequest request = (HttpServletRequest) req;
 
-        response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000"); // Allow requests from React app
+        response.setHeader("Access-Control-Allow-Origin", "http://localhost:3001"); // Allow requests from React app
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         response.setHeader("Access-Control-Allow-Headers", "content-type");
 

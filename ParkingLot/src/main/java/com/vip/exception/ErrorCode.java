@@ -14,5 +14,8 @@ public class ErrorCode {
     public static final String INCORRECT_PASSWORD ="INCORRECT_PASSWORD";
     public static final String USER_IS_NOT_PRESENT ="USER_IS_NOT_PRESENT";
     public static final String USER_IS_ALREADY_PRESENT ="USER_IS_ALREADY_PRESENT";
+    public static final String TEMPLATE_NOT_AVAILABLE ="TEMPLATE_NOT_AVAILABLE";
+    public static final String CONTENT_IS_NOT_PRESENT = "CONTENT_IS_NOT_PRESENT" ;
+    public static final String OTP_NOT_FOUND = "OTP_NOT_FOUND" ;
     // Add more error codes as needed for your specific use cases
 }

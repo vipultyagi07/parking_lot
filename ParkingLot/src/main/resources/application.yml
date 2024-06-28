@@ -15,3 +15,23 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: vipultyagicoc@gmail.com
+    password: stpc donm gdiu dydq
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+parkinglot:
+  email:
+    senderName: "Parking Lot"
+
+otp:
+  encryption:
+    secretKey: AVdvd@1999#d

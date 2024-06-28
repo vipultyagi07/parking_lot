@@ -6,6 +6,7 @@ import com.vip.dto.SignUpDto;
 import com.vip.dto.SignUpResponseDto;
 import com.vip.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,15 +32,17 @@ public class UserController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> sendOTP(@RequestParam String phoneNumber) {
+    public ResponseEntity<String> sendOTP(@RequestParam String toEmail) throws Exception {
         // Generate and send OTP logic here
-        return userService.sendOTP(phoneNumber);
+         userService.sendOTP(toEmail);
+        return new ResponseEntity<>("Otp sent successfully", HttpStatus.OK);
+
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<Object> verifyOTP(@RequestBody Map<String, String> otpData) {
+    public ResponseEntity<Object> verifyOTP(@RequestBody Map<String, String> otpData) throws Exception {
         // Verify OTP logic here
-        return userService.verifyOTP(otpData.get("phoneNumber"), otpData.get("otp"));
+        return userService.verifyOTP(otpData.get("email"), otpData.get("otp"));
 
     }
 
