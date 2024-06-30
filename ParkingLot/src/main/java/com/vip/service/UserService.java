@@ -171,15 +171,15 @@ public class UserService {
 
     }
 
-    public ResponseEntity<Object> resetPassword(String phoneNumber, String newPassword) throws Exception {
+    public ResponseEntity<Object> resetPassword(String email, String newPassword) throws Exception {
 
-        User existingUser = userRepo.findTop1ByMobileNo(phoneNumber).get();
+        User existingUser = userRepo.findTop1ByEmail(email).get();
 
         String encodePassword = cryptoService.encryptData(newPassword);
         existingUser.setPassword(encodePassword);
         existingUser.setLastModifiedDate(new Date());
 
-        userRepo.save(existingUser);
+        userRepo.saveAndFlush(existingUser);
 
         return new ResponseEntity<>("Password Changed Successfully", HttpStatus.ACCEPTED);
 

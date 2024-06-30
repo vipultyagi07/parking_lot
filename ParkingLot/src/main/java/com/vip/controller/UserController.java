@@ -49,7 +49,7 @@ public class UserController {
     @PostMapping("/reset-password")
     public ResponseEntity<Object> resetPassword(@RequestBody Map<String, String> resetData) throws Exception {
         // Reset password logic here
-        return userService.resetPassword(resetData.get("phoneNumber"), resetData.get("newPassword"));
+        return userService.resetPassword(resetData.get("email"), resetData.get("newPassword"));
     }
 
 
