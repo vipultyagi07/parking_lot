@@ -6,5 +6,7 @@ import lombok.Data;
 public class LoginResponseDto {
 
     private String email;
+    private Long userId;
     private String loginStatus;
+    private String jwtToken;
 }
