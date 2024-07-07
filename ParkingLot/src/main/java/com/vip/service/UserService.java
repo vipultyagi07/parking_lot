@@ -91,6 +91,7 @@ public class UserService {
                     //Generate jwt token for this user
                     final String token = jwtUtil.generateToken(user.get().getEmail());
                     loginResponseDto.setJwtToken(token);
+                    loginResponseDto.setUserName(user.get().getName());
 
                     loginResponseDto.setEmail(loginDto.getEmail());
                     loginResponseDto.setUserId(user.get().getId());

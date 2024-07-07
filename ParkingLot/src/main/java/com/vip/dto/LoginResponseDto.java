@@ -9,4 +9,5 @@ public class LoginResponseDto {
     private Long userId;
     private String loginStatus;
     private String jwtToken;
+    private String userName;
 }
