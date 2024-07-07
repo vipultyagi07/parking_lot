@@ -9,10 +9,12 @@ import com.vip.dto.*;
 import com.vip.entity.User;
 import com.vip.exception.ErrorCode;
 import com.vip.exception.ParkingLotException;
+import com.vip.security.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -32,6 +34,12 @@ public class UserService {
 
     @Autowired
     private CryptoService cryptoService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     public ResponseEntity<SignUpResponseDto> saveTheDataOfNewUser(SignUpDto signUpDto) throws Exception {
         SignUpResponseDto signUpResponseDto = new SignUpResponseDto();
@@ -79,7 +87,13 @@ public class UserService {
                 String originalPassword = cryptoService.decryptData(encryptPassword);
                 if (loginDto.getPassword().equals(originalPassword)) {
                     LoginResponseDto loginResponseDto = new LoginResponseDto();
+
+                    //Generate jwt token for this user
+                    final String token = jwtUtil.generateToken(user.get().getEmail());
+                    loginResponseDto.setJwtToken(token);
+
                     loginResponseDto.setEmail(loginDto.getEmail());
+                    loginResponseDto.setUserId(user.get().getId());
                     loginResponseDto.setLoginStatus(LoginAndSignupStatus.LOGIN_SUCCESSFUL.getDisplayName());
                     return new ResponseEntity<>(loginResponseDto, HttpStatus.OK);
 
