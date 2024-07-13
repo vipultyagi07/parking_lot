@@ -21,8 +21,9 @@ public class TicketController {
 
     @PostMapping("/get/all/active")
     public ResponseEntity<Object> generateParkingTicket(@RequestBody Vehicle vehicle){
-        EntranceTicketDto entranceTicketDto = entranceGateService.generateParkingTicket(vehicle);
-        return new ResponseEntity<>(entranceTicketDto, HttpStatus.OK);
+//        EntranceTicketDto entranceTicketDto = entranceGateService.generateParkingTicket(vehicle);
+//        return new ResponseEntity<>(entranceTicketDto, HttpStatus.OK);
+        return null;
     }
 
 }
