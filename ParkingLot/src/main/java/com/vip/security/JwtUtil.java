@@ -1,24 +1,45 @@
 package com.vip.security;
 
+import com.vip.dto.UserRepo;
+import com.vip.entity.User;
+import com.vip.exception.ParkingLotException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 @Component
 public class JwtUtil {
 
     private String secret = "your_secret_key";
+    @Autowired
+    private UserRepo userRepository;
 
     public JwtUtil() {
         // Encode the secret key using Base64
         this.secret = Base64.getEncoder().encodeToString(secret.getBytes());
+    }
+    public Long getUserIdFromHttpServletRequest(HttpServletRequest request){
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            throw new ParkingLotException("Authorization header is missing or invalid", HttpStatus.UNAUTHORIZED.toString());
+        }
+
+        String jwtToken = authorizationHeader.substring(7); // Remove "Bearer " from the token
+        String userEmail = extractUsername(jwtToken);
+
+        User user = userRepository.findByEmailAndIsActiveTrue(userEmail);
+        if(Objects.isNull(user)){
+            throw new ParkingLotException("No Active user is present for this user", HttpStatus.UNAUTHORIZED.toString());
+
+        }
+        return user.getId();
     }
 
     public String extractUsername(String token) {
