@@ -61,6 +61,7 @@ public class UserService {
         newUser.setAddress(signUpDto.getAddress());
         newUser.setMobileNo(signUpDto.getMobileNo());
         newUser.setGender(signUpDto.getGender());
+        newUser.setActive(true);
         // first we encode the password and save it to the DB
 
         newUser.setPassword(cryptoService.encryptData(signUpDto.getPassword()));
