@@ -25,7 +25,7 @@ public class EntranceGateService {
     @Autowired
     private VehicleService vehicleService;
 
-    public EntranceTicketDto generateParkingTicket(Vehicle vehicle) {
+    public EntranceTicketDto generateParkingTicket(Vehicle vehicle, Long userId) {
 
         log.info("generateParkingTicket: Start generating parking ticket for vehicle No :{}",vehicle.getVehicleNo());
         try{/**
@@ -49,7 +49,7 @@ public class EntranceGateService {
          *  generates a new parking ticket with the current entry time, and saves the ticket.
          *  The saved parking ticket is then returned.
          */
-            ParkingTicket generatedTicket = saveAndGenerateTicket(currentVehicle, parkingSpot);
+            ParkingTicket generatedTicket = saveAndGenerateTicket(currentVehicle, parkingSpot,userId);
         if(Objects.isNull(generatedTicket)){
             log.info("generateParkingTicket: Stopped generating parking ticket for vehicle as Vehicle {} is already parked in the lot",vehicle.getVehicleNo());
                 throw new ParkingLotException("Vehicle " + vehicle.getVehicleNo() + " is already parked in the lot",
@@ -80,12 +80,13 @@ public class EntranceGateService {
         return parkingSpot;
     }
 
-    private ParkingTicket saveAndGenerateTicket(Vehicle oldVehicle, ParkingSpot parkingSpot) {
+    private ParkingTicket saveAndGenerateTicket(Vehicle oldVehicle, ParkingSpot parkingSpot,Long userId) {
         parkingSpot.setVehicle(oldVehicle);
         ParkingTicket ticket = new ParkingTicket();
         ticket.setEntryTime(LocalDateTime.now());
         ticket.setParkingSpot(parkingSpot);
         ticket.setVehicle(oldVehicle);
+        ticket.setUserId(userId);
         ParkingTicket generatedTicket = parkingTicketService.save(ticket);
         return generatedTicket;
     }
