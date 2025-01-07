@@ -39,7 +39,7 @@ public class EmailService {
         MessageTemplate messageTemplate = messageTemplateRepository.findByTemplateName(templateName);
         if(Objects.isNull(messageTemplate)){
 
-            throw new ParkingLotException("NO message template is present for templateName:"+templateName ,ErrorCode.TEMPLATE_NOT_AVAILABLE);
+            throw new ParkingLotException("NO message template is present for templateName:"+templateName , ErrorCode.TEMPLATE_NOT_AVAILABLE);
         }
         if(Objects.isNull(messageTemplate.getTemplateContent())){
 

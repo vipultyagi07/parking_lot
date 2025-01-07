@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -31,7 +30,7 @@ public class ExitGateService {
         try {
         ParkingTicket parkingTicket=parkingTicketService.findParkingTicketOfVehicle(vehicleNumber);
         if(Objects.isNull(parkingTicket)){
-            throw new ParkingLotException("Vehicle "+vehicleNumber+" already left the parking lot ",ErrorCode.VEHICLE_ALREADY_LEFT_THE_PARKING_LOT);
+            throw new ParkingLotException("Vehicle "+vehicleNumber+" already left the parking lot ", ErrorCode.VEHICLE_ALREADY_LEFT_THE_PARKING_LOT);
         }
 
         LocalDateTime entryTime = parkingTicket.getEntryTime();

@@ -1,92 +1,169 @@
 package com.vip.exception;
 
-import com.vip.common.errorResponse.ErrorClass;
+
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.servlet.NoHandlerFoundException;
-import java.sql.SQLException;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Objects;
 
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ParkingLotException.class)
-    public ResponseEntity<ErrorClass> handleParkingLotException(ParkingLotException ex) {
-        String errorCode = ex.getErrorCode();
-        ErrorClass errorClass;
 
-        switch (errorCode) {
-            case "INCORRECT_PASSWORD":
-                log.error("Incorrect password: " + ex.getMessage(), ex);
-                errorClass = new ErrorClass(errorCode, ex.getMessage());
-                return new ResponseEntity<>(errorClass, HttpStatus.UNAUTHORIZED);
-            case "USER_IS_ALREADY_PRESENT":
-                log.error("User already present, please sign in: " + ex.getMessage(), ex);
-                errorClass = new ErrorClass(errorCode, ex.getMessage());
-                return new ResponseEntity<>(errorClass, HttpStatus.CONFLICT);
-            case "USER_IS_NOT_PRESENT":
-                log.error("User is not present, please sign up: " + ex.getMessage(), ex);
-                errorClass = new ErrorClass(errorCode, ex.getMessage());
-                return new ResponseEntity<>(errorClass, HttpStatus.NOT_FOUND);
-            case "VEHICLE_ALREADY_PARKED":
-                log.error("Vehicle already parked: " + ex.getMessage(), ex);
-                errorClass = new ErrorClass(errorCode, ex.getMessage());
-                return new ResponseEntity<>(errorClass, HttpStatus.CONFLICT);
-            default:
-                log.error("Parking Lot Exception: " + errorCode + " - " + ex.getMessage(), ex);
-                errorClass = new ErrorClass(errorCode, ex.getMessage());
-                return new ResponseEntity<>(errorClass, HttpStatus.INTERNAL_SERVER_ERROR);
+    @ExceptionHandler(ParkingLotException.class)
+    public ResponseEntity<ErrorClass> handlePmsException(ParkingLotException ex) {
+        // Handle Exception
+        String errorCode = ex.getErrorCode();
+        HttpStatus httpStatus = ex.getHttpStatus();
+        // Check if it's an incorrect password error
+        if ("INCORRECT_PASSWORD".equals(errorCode)) {
+            log.error("Incorrect password: " + ex.getMessage(), ex);
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            String stackTrace = sw.toString();
+            ErrorClass errorClass = new ErrorClass(httpStatus, errorCode, ex.getMessage(),stackTrace);
+            return new ResponseEntity<>(errorClass, HttpStatus.UNAUTHORIZED);
+        } else if ("USER_IS_ALREADY_PRESENT".equals(errorCode)) {
+            log.error("User already present, please sign in: " + ex.getMessage(), ex);
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            String stackTrace = sw.toString();
+            ErrorClass errorClass = new ErrorClass(httpStatus, errorCode, ex.getMessage(),stackTrace);
+            return new ResponseEntity<>(errorClass, HttpStatus.CONFLICT);
+
+        } else if ("USER_IS_NOT_PRESENT".equals(errorCode)) {
+            log.error("User is not present, please sign up: " + ex.getMessage(), ex);
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            String stackTrace = sw.toString();
+            ErrorClass errorClass = new ErrorClass(httpStatus, errorCode, ex.getMessage(),stackTrace);
+            return new ResponseEntity<>(errorClass, HttpStatus.NOT_FOUND);
+
+        } else {
+            // Handle all other types of errors
+//            ErrorClass errorClass = new ErrorClass(httpStatus, errorCode, ex.getMessage());
+            ErrorClass errorClass = new ErrorClass(httpStatus, errorCode, ex.getMessage(),ex.getErrorStackTrace());
+            if (Objects.nonNull(httpStatus)) {
+                log.error("handleException: error associated with error message: {}", ex.getMessage());
+                return new ResponseEntity<>(errorClass, httpStatus);
+            }
+            return new ResponseEntity<>(errorClass, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorClass> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        log.error("Invalid JSON format: " + ex.getMessage(), ex);
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        ex.printStackTrace(pw);
+        String stackTrace = sw.toString();
+        ErrorClass errorClass = new ErrorClass(HttpStatus.BAD_REQUEST, "INVALID_JSON", ex.getMessage(),stackTrace);
+        return new ResponseEntity<>(errorClass, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorClass> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException ex) {
+        log.error("Request method not supported: " + ex.getMethod(), ex);
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        ex.printStackTrace(pw);
+        String stackTrace = sw.toString();
+        ErrorClass errorClass = new ErrorClass(HttpStatus.METHOD_NOT_ALLOWED, "METHOD_NOT_ALLOWED", ex.getMessage(),stackTrace);
+        return new ResponseEntity<>(errorClass, HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorClass> handleValidationException(MethodArgumentNotValidException ex) {
-        log.error("Validation error: " + ex.getMessage(), ex);
-        ErrorClass errorClass = new ErrorClass("VALIDATION_ERROR", ex.getBindingResult().toString());
+    public ResponseEntity<ErrorClass> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        log.error("Validation failed: " + ex.getMessage(), ex);
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        ex.printStackTrace(pw);
+        String stackTrace = sw.toString();
+        ErrorClass errorClass = new ErrorClass(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", ex.getMessage(),stackTrace);
+        return new ResponseEntity<>(errorClass, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorClass> handleMissingServletRequestParameterException(MissingServletRequestParameterException ex) {
+        log.error("Missing request parameter: " + ex.getParameterName(), ex);
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        ex.printStackTrace(pw);
+        String stackTrace = sw.toString();
+        ErrorClass errorClass = new ErrorClass(HttpStatus.BAD_REQUEST, "MISSING_PARAMETER", "Missing request parameter: " + ex.getParameterName(),stackTrace);
+        return new ResponseEntity<>(errorClass, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ServletRequestBindingException.class)
+    public ResponseEntity<ErrorClass> handleServletRequestBindingException(ServletRequestBindingException ex) {
+        log.error("Request binding error: " + ex.getMessage(), ex);
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        ex.printStackTrace(pw);
+        String stackTrace = sw.toString();
+        ErrorClass errorClass = new ErrorClass(HttpStatus.BAD_REQUEST, "REQUEST_BINDING_ERROR", ex.getMessage(),stackTrace);
         return new ResponseEntity<>(errorClass, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
-    public ResponseEntity<ErrorClass> handleNoHandlerFoundException(NoHandlerFoundException ex, WebRequest request) {
-        log.error("No handler found: " + ex.getRequestURL(), ex);
-        ErrorClass errorClass = new ErrorClass("NOT_FOUND", "No handler found for " + ex.getRequestURL());
+    public ResponseEntity<ErrorClass> handleNoHandlerFoundException(NoHandlerFoundException ex) {
+        log.error("No handler found for request: " + ex.getHttpMethod() + " " + ex.getRequestURL(), ex);
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        ex.printStackTrace(pw);
+        String stackTrace = sw.toString();
+        ErrorClass errorClass = new ErrorClass(HttpStatus.NOT_FOUND, "NO_HANDLER_FOUND", ex.getMessage(),stackTrace);
         return new ResponseEntity<>(errorClass, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ErrorClass> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
-        log.error("Method argument type mismatch: " + ex.getName(), ex);
-        ErrorClass errorClass = new ErrorClass("ARGUMENT_TYPE_MISMATCH", "Argument type mismatch for " + ex.getName());
-        return new ResponseEntity<>(errorClass, HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(AsyncRequestTimeoutException.class)
+    public ResponseEntity<ErrorClass> handleAsyncRequestTimeoutException(AsyncRequestTimeoutException ex) {
+        log.error("Async request timeout: " + ex.getMessage(), ex);
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        ex.printStackTrace(pw);
+        String stackTrace = sw.toString();
+        ErrorClass errorClass = new ErrorClass(HttpStatus.SERVICE_UNAVAILABLE, "ASYNC_TIMEOUT", ex.getMessage(),stackTrace);
+        return new ResponseEntity<>(errorClass, HttpStatus.SERVICE_UNAVAILABLE);
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorClass> handleConstraintViolationException(ConstraintViolationException ex) {
-        log.error("Constraint violation: " + ex.getMessage(), ex);
-        ErrorClass errorClass = new ErrorClass("CONSTRAINT_VIOLATION", ex.getMessage());
-        return new ResponseEntity<>(errorClass, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(SQLException.class)
-    public ResponseEntity<ErrorClass> handleSQLException(SQLException ex) {
-        log.error("SQL error: " + ex.getMessage(), ex);
-        ErrorClass errorClass = new ErrorClass("SQL_ERROR", ex.getMessage());
-        return new ResponseEntity<>(errorClass, HttpStatus.INTERNAL_SERVER_ERROR);
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorClass> handleAccessDeniedException(AccessDeniedException ex) {
+        log.error("Access denied: " + ex.getMessage(), ex);
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        ex.printStackTrace(pw);
+        String stackTrace = sw.toString();
+        ErrorClass errorClass = new ErrorClass(HttpStatus.FORBIDDEN, "ACCESS_DENIED", ex.getMessage(),stackTrace);
+        return new ResponseEntity<>(errorClass, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorClass> handleGenericException(Exception ex) {
-        log.error("An error occurred: " + ex.getMessage(), ex);
-        ErrorClass errorClass = new ErrorClass("INTERNAL_SERVER_ERROR", ex.getMessage());
+    public ResponseEntity<ErrorClass> handleGeneralException(Exception ex) {
+        log.error("An unexpected error occurred: " + ex.getMessage(), ex);
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        ex.printStackTrace(pw);
+        String stackTrace = sw.toString();
+        ErrorClass errorClass = new ErrorClass(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", ex.getMessage(),stackTrace);
         return new ResponseEntity<>(errorClass, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
