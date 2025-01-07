@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Repository
-public interface ParkingTicketRepository extends JpaRepository<ParkingTicket,Long> {
+public interface ParkingTicketRepository extends JpaRepository<ParkingTicket,Long>,CustomParkingTicketRepository {
     ParkingTicket findByVehicleAndExitTimeNull(Vehicle vehicle);
 
 

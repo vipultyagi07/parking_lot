@@ -31,6 +31,10 @@ public class ParkingTicket {
     @JsonIgnore
     @JoinColumn(name = "parking_spot_id") // specify the foreign key column
     private ParkingSpot parkingSpot;
+    /*user who is currently operating the system*
+     *
+     */
+    private Long userId;
 
     // getters and setters
 }
