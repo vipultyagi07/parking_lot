@@ -39,7 +39,7 @@ public class SecurityConfig {
                 .cors(withDefaults()) // Enable CORS with defaults
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/authenticate", "/api/users/**").permitAll() // Allow all endpoints under /api/users
+                                .requestMatchers("/authenticate", "/api/users/**","/vehicle-updates/**").permitAll() // Allow all endpoints under /api/users
                                 .anyRequest().authenticated()
                 )
                 .exceptionHandling(exceptionHandling ->
