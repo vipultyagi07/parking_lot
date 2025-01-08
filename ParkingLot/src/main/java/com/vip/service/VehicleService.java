@@ -5,6 +5,8 @@ import com.vip.repo.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class VehicleService {
 
@@ -23,5 +25,11 @@ public class VehicleService {
     public Vehicle findExistingVehicle(String vehicleNumber) {
         Vehicle vehicle = vehicleRepository.findByVehicleNo(vehicleNumber);
         return vehicle;
+    }
+
+    public List<Vehicle> getAllVehicle() {
+
+        List<Vehicle> allVehicle = vehicleRepository.findAll();
+        return allVehicle;
     }
 }
